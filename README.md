@@ -1,3 +1,8 @@
-Communication-robot
-Creators
--Hadi, Choki, Shimada
+## Creators
+This project was developed by:
+
+Abdullah
+
+Choki
+
+Shimada
