@@ -1,6 +1,8 @@
 import asyncio
 from commandl_ine import CommandLine, GUI
 from brain import Brain
+from vision-text-llm import OllamaVisionChat
+
 """
 from camera import *
 from motor import *
@@ -37,6 +39,12 @@ class Main:
             cli = CommandLine()
             gui = GUI(cli)
             gui.run()
+    
+    @staticmethod
+    async def gemma3_4b_cloud():
+        model = "gemma3:4b-cloud"
+        chat = OllamaVisionChat(model)
+        # Implementation of gemma3_4b_cloud method...
 
 
 async def main():
@@ -46,6 +54,7 @@ async def main():
         m.camera_loop(),
         m.voice_loop(),
         m.commandline_loop(),
+        m.gemma3_4b_cloud(),
         return_exceptions=True
     )
 
@@ -75,4 +84,5 @@ if __name__ == "__main__":
         "⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬜️⬛️⬜️⬛️⬜️\n",
         "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
     )
+
     asyncio.run(main())
