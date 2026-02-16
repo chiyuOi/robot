@@ -12,6 +12,7 @@ This system utilizes four AI components working together:
 - Text generation and understanding
 
 ### 2. Text Humanization AI
+**Model:** qwen3-vl:235b-instruct-cloud
 **Purpose:** 
 - Converts AI-generated text into natural, human-like speech
 - Improves conversational flow and readability
