@@ -1,7 +1,13 @@
-import OllamaVisionChat
+import asyncio
+from commandl_ine import CommandLine, GUI
+from brain import Brain
+from vision-text-llm import OllamaVisionChat
 
+class Main:
+    # ... existing methods ...
 
-async def gemini_3_4b_cloud():
-    # Integrate the vision-text-llm functionality here
-    pass
-
+    @staticmethod
+    async def gemma3_4b_cloud():
+        model = "gemma3:4b-cloud"
+        chat = OllamaVisionChat(model)
+        # Implementation of gemma3_4b_cloud method...
