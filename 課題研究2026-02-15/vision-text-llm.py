@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 class OllamaVisionChat:
-    def __init__(self, model="qwen3-vl:235b-cloud", base_url="http://localhost:11434"):
+    def __init__(self, model="ministral-3:3b-cloud", base_url="http://localhost:11434"):
         """
         Initialize Ollama Vision Chat
         
