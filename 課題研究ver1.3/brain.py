@@ -40,9 +40,23 @@ class Brain:
 
 
 if __name__ == "__main__":
+    from motor import Limiter,StepperManager
+    import asyncio
+    
     print("※終了する場合は 'q' ")
     brain = Brain()
-
+    ms=StepperManager()
+    
+    tr_command = {
+            "上":lambda:ms.move(speed=500,a=32),
+            "下":lambda:ms.move(speed=500,a=-32),
+            "右":lambda:ms.move(speed=500,b=32),
+            "左":lambda:ms.move(speed=500,b=-32),
+        }
+    
+    async def main():
+            await tr_command[result]()
+            
     while True:
         situation_input = input("\n状況を入力してください > ")
         if situation_input.lower() in ['q', 'quit', 'exit']:
@@ -55,6 +69,7 @@ if __name__ == "__main__":
         try:
             result = brain.decide(situation=situation_input)
             print(result)
+            asyncio.run(main())
 
         except Exception as e:
             print(f"エラーが発生: {e}")
