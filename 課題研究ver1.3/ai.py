@@ -5,9 +5,11 @@ class Ai:
         self,
         api_client: AutoRotatingAPIClient,
         prompt: str,
-        api_url: str = "https://api.groq.com/openai/v1/chat/completions", # URLを変更可能に
-        model: str = "llama-3.1-8b-instant",                              # モデルを変更可能に
-        temperature: float = 0.7,                                         # 温度を変更可能に
+        # URLをGroqのオンラインAPIに変更
+        api_url: str = "https://api.groq.com/openai/v1/chat/completions",
+        # モデル名をGroq上のQwenに変更
+        model: str = "qwen-2.5-32b",
+        temperature: float = 0.7,
         keep_history: bool = True
     ):
         self.api_client = api_client

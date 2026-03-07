@@ -1,31 +1,41 @@
 import asyncio
+
 from commandl_ine import CommandLine, GUI
 from brain import Brain
 from vision_text_llm import OllamaVisionChat
 from motor import StepperManager
+from state import State, CameraState, VoiceState
 """
-from camera import *
-from motor import *
-from voice import *
+from camera import 
+from voice import 
 """
+
 
 class Main:
     def __init__(self):
+        self.stepper = StepperManager()
         self.tr_command = {
-            "上":StepperManager().move(a=5),
-            "下":StepperManager().move(a=-5),
-            "右":StepperManager().move(b=5),
-            "左":StepperManager().move(b=-5),
+            "上": lambda: self.stepper.move(a=5),
+            "下": lambda: self.stepper.move(a=-5),
+            "右": lambda: self.stepper.move(b=5),
+            "左": lambda: self.stepper.move(b=-5),
         }
+        self.fps = 5
 
     async def brain_loop(self):
-        print("brain loop")
+        print("Brain loop 開始")
+        brain = Brain()
+
         while True:
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(1 / self.fps)
             try:
-                await Brain().decide(situation="")
+                result = brain.decide(situation=State)
+                print(f"決定事項: {result}")
+                if result in self.tr_command:
+                    self.tr_command[result]()
+
             except Exception as e:
-                print(e)
+                print(f"エラーが発生: {e}")
 
     @staticmethod
     async def camera_loop():
@@ -92,5 +102,4 @@ if __name__ == "__main__":
         "⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬜️⬛️⬜️⬛️⬜️\n",
         "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
     )
-
     asyncio.run(main())
