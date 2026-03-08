@@ -102,9 +102,28 @@ async def main():
         # さらに45度回転 (累積される)
         await mana.move(speed=400, a=45)
         print(f"最終角度: {mana.angles}")
-
-    except Exception as e:
-        print(f"エラー発生: {e}")
+   
+    finally:
+        print(f"運命の歯車終了")
+        
+async def fallback():
+    mana = StepperManager()
+    try:
+        print(f"モーション実行")
+        
+        await mana.move(speed=400, c=45, d=60,)
+        await mana.move(speed=400, a=45)
+        await mana.move(speed=400, a=-90, d=-60,)
+        await mana.move(speed=400, a=90, d=60,)
+        await mana.move(speed=400, a=-45)
+        await mana.move(speed=400, c=-45, d=-60,)
+    
+    finally:
+        print(f"モーション実行終了")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        print(f"エラー発生: {e}")
+        asyncio.run(fallback())
