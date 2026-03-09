@@ -39,6 +39,7 @@ These AI components work collaboratively to process multimodal inputs (image, vi
 - Image recognition: Gemini 2.0 Flash (Google AI studio) → llama-4-scout (Groq)
 - Motor command and Text Humanization- qwen-instruct(ollama) → Unknown (Groq)
 - Speech-To-Text library; SpeechRecognition Library → whisper-large-v3-turbo (Groq)
+  
   ** System Overview Draft **
   -Wake-word and command text input: Whisper-lage-v3-turbo→
 Image Recognition LLM(Input: Image, Transcribed Text | Output: XY axis & object description, Response Text to Transcribed Text) →  Qwen3-32b(Humanization, Motor command) →　Humanized text: gTTS,  Motor Command Text- Move motors
