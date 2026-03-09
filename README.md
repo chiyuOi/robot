@@ -31,7 +31,7 @@ This system utilizes four AI components working together:
 ## System Integration
 These AI components work collaboratively to process multimodal inputs (image, video, text) and generate both natural language responses and motor control outputs.
 
-** P.S. Possible changes **
+**P.S. Possible changes**
 - Possibly transiton all LLM library from Ollama to Groq,
 - For Image recognition: Gemini 2.0 Flash (Google AI studio) → llama-4-scout (Groq)
 - For Motor command and Text Humanization- qwen-instruct(ollama) → Unknown (Groq)
