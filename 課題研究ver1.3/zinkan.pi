@@ -17,6 +17,7 @@ class MotionSystem:
         self.last_time = 0
         
         self.buffer = []
+        self.time_window = 0.3
 
         self.sensors = {}
 
@@ -31,47 +32,51 @@ class MotionSystem:
 
             self.sensors[direction] = pir
 
-
     def detect(self, direction):
 
         now = time.time()
-        
-        # 同じセンサーの連続検知を無視
+
+        # 同じセンサーの連続検知除去
         if direction == self.last_direction and now - self.last_time < 2:
             return
 
-        print(f"{direction}センサー検知")
-
-        if self.last_direction:
-
-            print(f"{self.last_direction} → {direction} に移動")
-
         self.last_direction = direction
         self.last_time = now
-        
+
         self.buffer.append((direction, now))
 
-        # 0.3秒以内の検知だけ残す
+        # 時間窓フィルタ
         self.buffer = [
             item for item in self.buffer
-            if now - item[1] < 0.3
+            if now - item[1] < self.time_window
         ]
 
-        # 最初の検知
-        first = self.buffer[0][0]
+        self.process_detection()
 
-        print("検知:", [x[0] for x in self.buffer])
-        print("最初の方向:", first)
+
+    def process_detection(self):
+
+        if not self.buffer:
+            return
+
+        directions = [x[0] for x in self.buffer]
+
+        # 同時検知
+        if len(directions) > 1:
+            print("同時検知:", directions)
+        else:
+            print("検知:", directions[0])
 
 def main():
+
     system = MotionSystem()
-    
+
     print("人感センサー実行")
-    
+
     pause()
-        
+
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-         print("人感センサーエラー", e)
+        print("人感センサーエラー", e)
