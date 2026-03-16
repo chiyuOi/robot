@@ -5,6 +5,7 @@ This system utilizes four AI components working together:
 
 <img width="459" height="505" alt="image" src="https://github.com/user-attachments/assets/d304036f-8e21-48ce-9c9c-2f8948a83663" />
 
+<img width="459" height="505" alt="image" src="https://github.com/user-attachments/assets/d304036f-8e21-48ce-9c9c-2f8948a83663" />
 
 
 
