@@ -3,41 +3,38 @@ from signal import pause
 import time
 
 class MotionSystem:
-
     def __init__(self):
-
         self.sensor_pins = {
-            "north":17,
-            "east":27,
-            "south":22,
-            "west":23
+            "north": 17,
+            "east": 27,
+            "south": 22,
+            "west": 23
         }
 
         self.last_direction = None
         self.last_time = 0
         
-        self.buffer = []
-        self.time_window = 0.3
+        self.buffer =[]
+        self.time_window = 0.05
 
         self.sensors = {}
 
         for direction, pin in self.sensor_pins.items():
-
-            pir = MotionSensor(pin)
+            # 【改善2】sample_rate=100 にして、センサーのチェック頻度を極限まで上げる
+            pir = MotionSensor(pin, sample_rate=100)
 
             def detected(direction=direction):
                 self.detect(direction)
 
             pir.when_motion = detected
-
             self.sensors[direction] = pir
 
     def detect(self, direction):
-
         now = time.time()
 
-        # 同じセンサーの連続検知除去
-        if direction == self.last_direction and now - self.last_time < 2:
+        # 【改善1】同じセンサーの連続検知の制限を 2秒 → 0.2秒 に短縮！
+        # （もし連続検知を制限しなくて良いなら、この2行ごと削除してOKです）
+        if direction == self.last_direction and now - self.last_time < 0.2:
             return
 
         self.last_direction = direction
@@ -45,17 +42,15 @@ class MotionSystem:
 
         self.buffer.append((direction, now))
 
-        # 時間窓フィルタ
-        self.buffer = [
+        # 時間窓フィルタ (0.05秒以内に来たものを同時とみなす)
+        self.buffer =[
             item for item in self.buffer
             if now - item[1] < self.time_window
         ]
 
         self.process_detection()
 
-
     def process_detection(self):
-
         if not self.buffer:
             return
 
@@ -63,20 +58,24 @@ class MotionSystem:
 
         # 同時検知
         if len(directions) > 1:
-            print("同時検知:", directions)
+            print(f"同時検知: {directions}")
         else:
-            print("検知:", directions[0])
+            print(f"検知: {directions[0]}")
 
 def main():
-
     system = MotionSystem()
-
-    print("人感センサー実行")
-
+    print("人感センサー実行中... (Ctrl+Cで終了)")
+    
+    # gpiozeroは pause() だけでメインループを待機できるため、
+    # while True: time.sleep(1) のループは不要になります。
     pause()
 
 if __name__ == "__main__":
     try:
         main()
+    except KeyboardInterrupt:
+        # Ctrl+C が押されたときは綺麗に終了する
+        print("\n人感センサーを終了します")
     except Exception as e:
-        print("人感センサーエラー", e)
+        # fストリング (f"...") を使ってエラーメッセージを正しく表示
+        print(f"人感センサーエラー: {e}")
