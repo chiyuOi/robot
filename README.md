@@ -3,7 +3,7 @@
 - ✅リアルタイム画像認識 : *YOLO26n-seg*
 - ✅画像デスクリプション生成LLM : *Groq llama-4-scout*
 - ✅文字起こし : *Groq Whisper-large-v3-turbo*
-- ✅文字読み上げ : *Qwen TTS or Mistral TTS*
+- ✅文字読み上げ : *Qwen TTS または Mistral TTS*
 - ❌3D外形モデリング
 - ❌機能管理（全体のフレームワーク、アルゴリズム）: *Threading　と async*
 - ❌モータプログラム生成・文字読み上げテキスト生成AI : *Groq Qwen 3-32b*
