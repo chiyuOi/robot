@@ -10,6 +10,6 @@
 - ❌拡張機能（音楽再生、Google検索、天気情報API）
 - ❌ローカルでの運用 : *Gemma4, LiteRT-LM*
 
-#ダイアグラム
+# ダイアグラム
 
 <img width="586" height="634" alt="image" src="https://github.com/user-attachments/assets/6ed4437a-877b-4bca-850b-7009fecd38ae" />
