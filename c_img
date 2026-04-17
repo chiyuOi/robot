@@ -1,0 +1,39 @@
+import time
+import warnings
+from huggingface_hub import InferenceClient
+
+# 警告を無視
+warnings.filterwarnings("ignore")
+
+# クライアントの初期化（セッションが維持されるので高速）
+client = InferenceClient(
+    model="black-forest-labs/FLUX.1-schnell",
+    token="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"
+)
+
+def query_ultra_fast(prompt):
+    try:
+        start_time = time.time()
+        
+        # 1. 解像度を256x256に（転送速度アップ）
+        # 2. num_inference_stepsを2に（計算量ダウン）
+        image = client.text_to_image(
+            prompt,
+            width=128,
+            height=128,
+            num_inference_steps=2
+        )
+        
+        elapsed = time.time() - start_time
+        print(f"生成成功！ タイム: {elapsed:.3f} 秒")
+        
+        # 保存はRAMディスク(/dev/shm)に投げる（I/Oをゼロにする）
+        image.save("/dev/shm/output.png")
+        return image
+        
+    except Exception as e:
+        print(f"エラー発生: {e}")
+
+# 実行
+query_ultra_fast("robot in motion, flat vector")
+
