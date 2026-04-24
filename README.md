@@ -15,8 +15,8 @@
 - ❌ローカルでの運用 : *Gemma4, LiteRT-LM*
 - ✅画像生成の速度向上
 - ❌プロジェクトシステム（画像生成）の作成
-
-
+- デスクの上に指差して、ライオンの画像生成してって言ったらそこに投影される。
+  
 # ダイアグラム
 
 <img width="586" height="634" alt="image" src="https://github.com/user-attachments/assets/6ed4437a-877b-4bca-850b-7009fecd38ae" />
