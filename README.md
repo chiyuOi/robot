@@ -2,7 +2,7 @@
 # 〜拡張現実を使用したロボットアシスタント〜
 <img width="528" height="396" alt="image" src="https://github.com/user-attachments/assets/3f92402a-71e8-470b-b3a1-1302de989527" />
 
-# やることリス
+# やることリスト
 - ❌ファン印刷
 - ❌12Vモバイルバッテリー
 - ✅リアルタイム画像認識 : *YOLO26n-seg*
