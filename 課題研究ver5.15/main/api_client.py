@@ -75,3 +75,83 @@ class AutoRotatingAPIClient:
 
     def post(self, url: str, **kwargs):
         return self.request("POST", url, **kwargs)
+
+
+class OpenRouterClient:
+    """OpenRouter API Client with image/vision support"""
+    
+    def __init__(self):
+        load_dotenv()
+        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        if not self.api_key:
+            raise ValueError("OPENROUTER_API_KEY not found in .env")
+        
+        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+    
+    def send_message_with_image(self, messages: list, model: str = "meta-llama/llama-3.2-11b-vision-instruct", max_tokens: int = 500) -> str:
+        """Send message with optional image to OpenRouter
+        
+        Args:
+            messages: List of message dicts with role, content (content can have image_url)
+            model: Model to use (default: Llama 3.2 11B Vision - lightweight for Pi)
+            max_tokens: Max tokens for response
+        
+        Returns:
+            Response text
+        """
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com",
+            "X-Title": "Robot Vision System"
+        }
+        
+        payload = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": 0.5
+        }
+        
+        response = requests.post(self.base_url, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        content = result["choices"][0]["message"]["content"]
+        return content if content else "No response generated"
+    
+    def describe_image(self, image_base64: str, prompt: str = "Describe this image in detail") -> str:
+        """Describe an image using OpenRouter's vision model
+        
+        Args:
+            image_base64: Base64 encoded image data (without data URI prefix)
+            prompt: Description prompt/request
+        
+        Returns:
+            Image description
+        """
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            }
+        ]
+        
+        # Use Llama 3.2 Vision - lightweight and good quality for robot
+        response = self.send_message_with_image(
+            messages,
+            model="meta-llama/llama-3.2-11b-vision-instruct",
+            max_tokens=300
+        )
+        return response if response else "Unable to process image"

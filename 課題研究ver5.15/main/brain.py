@@ -1,5 +1,11 @@
-from api_client import AutoRotatingAPIClient
-from ai import Ai
+try:
+    # Try relative import (when run as module)
+    from .api_client import AutoRotatingAPIClient
+    from .ai import Ai
+except ImportError:
+    # Fallback to absolute import (for direct execution)
+    from api_client import AutoRotatingAPIClient
+    from ai import Ai
 
 
 CONTROL_PROMPT = """

@@ -1,4 +1,9 @@
-from api_client import AutoRotatingAPIClient
+try:
+    # Try relative import (when run as module)
+    from .api_client import AutoRotatingAPIClient
+except ImportError:
+    # Fallback to absolute import (for direct execution)
+    from api_client import AutoRotatingAPIClient
 
 class Ai:
     def __init__(
