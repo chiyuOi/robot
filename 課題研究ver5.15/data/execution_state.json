@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "data": {
+    "speech": "人を見つけました。モーターを動かします。",
+    "motor_commands": [
+      {
+        "axis": "a",
+        "angle": 10
+      },
+      {
+        "axis": "b",
+        "angle": -5
+      }
+    ],
+    "motor_count": 2
+  },
+  "timestamp": "2026-05-22T09:59:57.081814"
+}

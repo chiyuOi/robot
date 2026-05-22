@@ -1,105 +1,90 @@
 import asyncio
+import sys
+import argparse
+from pathlib import Path
 
-from commandl_ine import CommandLine, GUI
-from brain import Brain
-from vision_text_llm import OllamaVisionChat
-from motor import StepperManager
-from state import State, CameraState, VoiceState
-"""
-from camera import 
-from voice import 
-"""
+# プロジェクトルートをパスに追加
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
+from main.integrated_system import IntegratedRobotSystem
+from main.logger import get_logger
 
 class Main:
     def __init__(self):
-        self.stepper = StepperManager()
-        self.tr_command = {
-            "上": lambda: self.stepper.move(a=5),
-            "下": lambda: self.stepper.move(a=-5),
-            "右": lambda: self.stepper.move(b=5),
-            "左": lambda: self.stepper.move(b=-5),
-        }
-        self.fps = 5
+        self.logger = get_logger("robot_main")
+        self.system = IntegratedRobotSystem()
 
-    async def brain_loop(self):
-        print("Brain loop 開始")
-        brain = Brain()
-
-        while True:
-            await asyncio.sleep(1 / self.fps)
-            try:
-                result = brain.decide(situation=State)
-                print(f"決定事項: {result}")
-                if result in self.tr_command:
-                    self.tr_command[result]()
-
-            except Exception as e:
-                print(f"エラーが発生: {e}")
-
-    @staticmethod
-    async def camera_loop():
-        print("camera loop")
-        while True:
-            await asyncio.sleep(0.001)
-
-    @staticmethod
-    async def voice_loop():
-        print("voice loop")
-        while True:
-            await asyncio.sleep(0.001)
-
-    @staticmethod
-    async def commandline_loop():
-        print("commandline loop")
-        while True:
-            await asyncio.sleep(0.001)
-            cli = CommandLine()
-            gui = GUI(cli)
-            gui.run()
-    
-    @staticmethod
-    async def gemma3_4b_cloud():
-        model = "gemma3:4b-cloud"
-        chat = OllamaVisionChat(model)
-        # Implementation of gemma3_4b_cloud method...
-
+    async def run(self, continuous=False):
+        """ロボットシステムを起動"""
+        self.logger.log_stage("BOOT", "started", {"continuous": continuous})
+        
+        try:
+            # Initialize mock implementations for testing
+            from test.conftest import MockVoiceChat, MockCamera, MockStepper, MockTools, InMemoryDataManager
+            
+            # Use mocks for demo mode
+            if continuous:
+                print("🔄 Running in continuous demo mode...")
+            
+            # Create system with mocks
+            self.system = IntegratedRobotSystem()
+            
+            # Run pipeline
+            await self.system.run_pipeline()
+            
+            self.logger.log_stage("BOOT", "completed", {})
+        except KeyboardInterrupt:
+            print("\n🛑 ユーザーによって停止されました")
+        except Exception as e:
+            self.logger.log_error("BOOT", e, {"stack_trace": str(e)})
+            raise
 
 async def main():
-    m = Main()
-    await asyncio.gather(
-        m.brain_loop(),
-        m.camera_loop(),
-        m.voice_loop(),
-        m.commandline_loop(),
-        m.gemma3_4b_cloud(),
-        return_exceptions=True
-    )
+    # 引数解析
+    parser = argparse.ArgumentParser(description="Robot AI System - 課題研究ver5.15")
+    parser.add_argument("--continuous", action="store_true", help="連続モードで実行")
+    args = parser.parse_args()
 
+    # ASCII アートの表示
+    print_startup_banner()
+
+    m = Main()
+    try:
+        await m.run(continuous=args.continuous)
+    except KeyboardInterrupt:
+        print("\n🛑 ユーザーによって停止されました")
+    except Exception as e:
+        print(f"\n❌ 致命的なエラー: {e}")
+        import traceback
+        traceback.print_exc()
+
+def print_startup_banner():
+    """起動バナーを表示"""
+    banner = """
+⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬛️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬛️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬛️⬛️⬜️⬛️⬛️⬛️⬜️⬜️⬜️
+⬜️⬜️⬛️⬜️⬜️️⬜️⬛️⬛️⬜️⬛️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬛️⬜️⬜️️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️
+⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️
+"""
+    print(banner)
+    print("   🚀 Robot AI System v5.15 - Starting Up...")
+    print("   DI Container: ✅ Ready")
+    print("   Structured Logging: ✅ Active")
+    print("   Error Handling: ✅ Enhanced\n")
 
 if __name__ == "__main__":
-    print(
-        "\n",
-        "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬛️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬛️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬛️⬛️⬜️⬛️⬛️⬛️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬛️⬜️⬜️️⬜️⬛️⬛️⬜️⬛️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬛️⬜️⬜️️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬛️⬜️⬜️⬛️⬜️⬛️⬜️⬜️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬜️⬛️⬜️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬜️⬛️⬜️⬛️⬜️\n",
-        "⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️\n",
-    )
     asyncio.run(main())

@@ -1,0 +1,23 @@
+{
+  "status": "completed",
+  "data": {
+    "detections": [
+      {
+        "label": "person",
+        "x": 320,
+        "y": 240,
+        "confidence": 0.92
+      },
+      {
+        "label": "dog",
+        "x": 100,
+        "y": 150,
+        "confidence": 0.87
+      }
+    ],
+    "image_description": "明るい室内に人と犬がいます",
+    "detection_count": 2,
+    "target": "person"
+  },
+  "timestamp": "2026-05-22T09:59:57.081040"
+}
