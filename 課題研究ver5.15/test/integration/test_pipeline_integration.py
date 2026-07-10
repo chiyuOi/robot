@@ -6,6 +6,7 @@ test/integration/test_pipeline_integration.py
 
 import pytest
 from test.conftest import MockVoiceChat, MockCamera, MockStepper, MockTools, TestDataManager
+from main.integrated_system import ActionModule
 
 
 @pytest.mark.integration
@@ -123,3 +124,21 @@ class TestPipelineIntegration:
         assert summary['plan']['status'] == 'completed'
         assert summary['camera']['status'] == 'completed'
         assert summary['execution']['status'] == 'completed'
+
+    @pytest.mark.asyncio
+    async def test_stage3_system_report_finds_bugs_in_japanese(self, test_data_manager, di_container):
+        """STAGE 3: SYSTEM_REPORT がバグ候補を日本語で返す"""
+        await test_data_manager.save_voice_state("system report find bugs", {"input_method": "keyboard"})
+        await test_data_manager.save_plan_state("SYSTEM_REPORT", "bugs", "report requested")
+        await test_data_manager.save_camera_state([], "No objects detected")
+        await test_data_manager.save_execution_state("実行失敗", [], status="error")
+
+        action = ActionModule(container=di_container)
+        action.data = test_data_manager
+
+        result = await action.execute({"tool": "SYSTEM_REPORT"})
+
+        assert result["action"] == "system_report_generated"
+        assert result["language"] == "ja"
+        assert "日本語" in result["report_text"]
+        assert any(bug["stage"] == "execution" for bug in result["bugs"])
