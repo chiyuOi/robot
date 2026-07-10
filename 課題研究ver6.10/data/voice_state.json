@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "data": {
+    "transcription": "python3 main/main.py --continuous",
+    "input_method": "voice",
+    "confidence": 0.0
+  },
+  "timestamp": "2026-05-22T10:23:48.130705"
+}

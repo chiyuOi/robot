@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "data": {
+    "tool": "YOLO",
+    "target": "person",
+    "reasoning": "ユーザーが人の検出を要求した"
+  },
+  "timestamp": "2026-05-22T09:59:57.080350"
+}

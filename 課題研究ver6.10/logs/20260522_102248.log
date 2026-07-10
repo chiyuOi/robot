@@ -1,0 +1,1 @@
+2026-05-22 10:22:48,452 - robot_main - INFO - {"timestamp": "2026-05-22T10:22:48.452557", "stage": "BOOT", "status": "started", "data": {"continuous": true}, "duration_ms": 0}
