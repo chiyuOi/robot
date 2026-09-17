@@ -145,6 +145,7 @@ class PlanningModule:
 - "COLOR_TRACK": 特定の色を追跡します
 - "MOTION_ONLY": 単純な動作コマンドのみを実行します
 - "CONVERSATION": 会話のみで応答します
+- "SYSTEM_REPORT": システム状態を確認し、バグ候補を日本語で報告します
 
 重要: 以下の形式で**有効なJSON（コメントなし）**のみを返してください。他の言葉は一切出力しないでください:
 {"tool": "YOLO", "target": "検出対象", "reasoning": "理由"}
@@ -225,6 +226,8 @@ class ActionModule:
             return await self._execute_yolo(tool_config)
         elif tool == "COLOR_TRACK":
             return await self._execute_color_track(tool_config)
+        elif tool == "SYSTEM_REPORT":
+            return await self._execute_system_report()
         elif tool == "MOTION_ONLY":
             return {"action": "motion_ready", "details": "Ready for motion commands"}
         else:
@@ -297,6 +300,48 @@ class ActionModule:
             "coordinates": [320, 240]
         }
 
+    async def _execute_system_report(self) -> Dict[str, Any]:
+        """Generate system bug report in Japanese"""
+        summary = await self.data.get_summary()
+        stage_labels = {
+            "voice": "感知",
+            "camera": "行動",
+            "plan": "計画",
+            "execution": "実行"
+        }
+
+        bugs = []
+        for stage_key, stage_label in stage_labels.items():
+            status = summary.get(stage_key, {}).get("status", "unknown")
+            if status in {"error", "failed"}:
+                bugs.append({
+                    "stage": stage_key,
+                    "severity": "high",
+                    "message": f"{stage_label}ステージでエラー状態を検出しました（status={status}）。"
+                })
+            elif status == "idle":
+                bugs.append({
+                    "stage": stage_key,
+                    "severity": "medium",
+                    "message": f"{stage_label}ステージのデータが未実行です（status=idle）。"
+                })
+
+        if bugs:
+            report_text = "システムレポート（日本語）: バグ候補を検出しました。 " + " ".join(
+                f"{idx + 1}. {bug['message']}" for idx, bug in enumerate(bugs)
+            )
+        else:
+            report_text = "システムレポート（日本語）: 現時点で明確なバグは検出されませんでした。"
+
+        return {
+            "status": "success",
+            "action": "system_report_generated",
+            "language": "ja",
+            "bugs": bugs,
+            "report_text": report_text,
+            "summary": summary
+        }
+
 
 # ============================================================================
 # STAGE 4: INTEGRATION - Response Generation via Groq #2
@@ -310,6 +355,8 @@ class IntegrationModule:
 
 重要: 以下の形式で**有効なJSON（コメントなし）**のみを返してください。他の言葉は一切出力しないでください:
 {"speech": "音声応答", "motor_commands": [{"axis": "a", "angle": 10}], "status": "success"}
+
+system_report_generated の観測結果を受け取った場合は、必ず日本語で簡潔にバグ報告してください。
 
 軸の説明:
 - "a", "b", "c", "d": 各ステッパーモーター軸
@@ -532,7 +579,10 @@ class IntegratedRobotSystem:
                     return
             else:
                 print("⚠️  Planning module not available, using default CONVERSATION")
-                tool_config = {"tool": "CONVERSATION", "target": None}
+                if "system report" in user_speech.lower():
+                    tool_config = {"tool": "SYSTEM_REPORT", "target": "bugs"}
+                else:
+                    tool_config = {"tool": "CONVERSATION", "target": None}
             
             # STAGE 3: ACTION & OBSERVATION
             print("\n📍 STAGE 3: ACTION & OBSERVATION")
@@ -564,11 +614,18 @@ class IntegratedRobotSystem:
                     return
             else:
                 print("⚠️  Integration module not available")
-                response = {
-                    "speech": f"You said: {user_speech}",
-                    "motor_commands": [],
-                    "status": "demo"
-                }
+                if observation.get("action") == "system_report_generated":
+                    response = {
+                        "speech": observation.get("report_text", "システムレポートを生成しました。"),
+                        "motor_commands": [],
+                        "status": "success"
+                    }
+                else:
+                    response = {
+                        "speech": f"You said: {user_speech}",
+                        "motor_commands": [],
+                        "status": "demo"
+                    }
             
             sys.stdout.flush()
             
